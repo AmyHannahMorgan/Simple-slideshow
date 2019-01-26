@@ -6,7 +6,7 @@ simple slideshow for websites (college project)
 The intent of this repository is to provide a simple, easy to use and modify slideshow element that can be used as part of the unit 3/13 website task.
 
 ## Limitations
-Currently the code can only handle one style of slideshow, click through, and only uses one type of animation, fade out and in. Each slideshow is also set to a single 10 second timer and this cannot be change for individual slideshows, the length of timer, however, can be changed by editing the global 'slideTimer' variable in the Slideshow-JS file.
+Currently the code can only handle one style of slideshow, click through, and only uses one type of animation, fade out and in. Each slideshow is also set to a single 10 second timer and this cannot be changed for individual slideshows, the length of timer, however, can be changed by editing the global `slideTimer` variable in the Slideshow-JS file.
 
 ## Use
 
