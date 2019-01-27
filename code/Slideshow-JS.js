@@ -3,15 +3,44 @@
 var slideshowObjs = []; // array for storing Slideshow objects
 var slideTimer = 10000; // global timer for slide changes, 1000 = 1 second & 10000 = 10 seconds
 
-// TODO add pauseable timer object
-
+function PausableTimer(func, time){ // creates a pausabletimer object
+	this.time = time; // stores the time that the timer should wait for
+	this.continue = 0; //stores the time left on the timer if paused
+	this.func = func; // stores the function that should be executed when the timer reaches 0
+	this.timer = setTimeout(this.func, this.time); // creates a timeout using the function and time provided
+	this.start = Date.now(); // stores the date
+	this.paused = false
+	
+	this.pause = function(){
+		if(!this.paused){
+			clearTimeout(this.timer);
+			this.continue = this.time - (Date.now() - this.start);
+			this.paused = true;
+		}
+	};
+	
+	this.unpause = function(){
+		if(this.paused){
+			this.timer = setTimeout(this.func, this.continue);
+			this.paused = false;
+		}
+	};
+	
+	this.restart = function(){
+		this.timer = setTimeout(this.func, this.time);
+		this.start = Date.now();
+	};
+	
+	this.clear = function(){
+		clearTimeout(this.timer);
+	};
+}
+	
 function Slideshow(slideshowElem) { // function for creating slideshow objects
 
 	/* 'this' refers to the object that is containing it, in this case 'this' is refering to the Slideshow 
 	object that is being created. We create and set attributes and methods of objects by first calling
 	'this.' followed by the name of the attribute or method and then the value */
-  
-	// TODO make slideshow elements customisable using element attributes
 	
 	this.parent = slideshowElem; // saves the parent slideshow element as an attripute
 	
@@ -34,7 +63,7 @@ function Slideshow(slideshowElem) { // function for creating slideshow objects
 	
 	var obj = this; // creates a variable referencing the object
 	
-	this.timer = setTimeout(function(){
+	this.timer = new PausableTimer(function(){
 		obj.changeSlide(false, obj.index + 1);
 	}, slideTimer);
 	
@@ -54,11 +83,10 @@ function Slideshow(slideshowElem) { // function for creating slideshow objects
 		}
 	});
 	
-	// TODO add different slide transitions
 	this.changeSlide = function(click, slide){
 		this.inProg = true;
 		if(click === true){
-			clearTimeout(this.timer); // clear slide timer if button was clicked
+			this.timer.clear(); // clear slide timer if button was clicked
 		}
 		
 		/* checks if selected slide is above greater than the length of the array and loops the slide if so*/
@@ -82,9 +110,7 @@ function Slideshow(slideshowElem) { // function for creating slideshow objects
 				this.removeEventListener('animationend', bar);
 				obj.index = slide; // sets the new index to the slide index;
 				obj.inProg = false; // sets in progress to false to allow the slides to be changed again
-				obj.timer = setTimeout(function(){ // sets the timer recursivly
-					obj.changeSlide(false, obj.index + 1);
-				}, slideTimer);
+				obj.timer.restart();
 			});
 			this.classList.add('ssFadeIn');
 			obj.dots[slide].classList.add('active');
