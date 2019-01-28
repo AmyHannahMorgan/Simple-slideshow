@@ -3,13 +3,14 @@
 var slideshowObjs = []; // array for storing Slideshow objects
 var slideTimer = 10000; // global timer for slide changes, 1000 = 1 second & 10000 = 10 seconds
 
+
 function PausableTimer(func, time){ // creates a pausabletimer object
 	this.time = time; // stores the time that the timer should wait for
 	this.continue = 0; //stores the time left on the timer if paused
 	this.func = func; // stores the function that should be executed when the timer reaches 0
 	this.timer = setTimeout(this.func, this.time); // creates a timeout using the function and time provided
 	this.start = Date.now(); // stores the date
-	this.paused = false
+	this.paused = false;
 	
 	this.pause = function(){
 		if(!this.paused){
@@ -62,10 +63,15 @@ function Slideshow(slideshowElem) { // function for creating slideshow objects
 	/* TODO add explenation of encapsulation and 'this' use*/
 	
 	var obj = this; // creates a variable referencing the object
-	
-	this.timer = new PausableTimer(function(){
-		obj.changeSlide(false, obj.index + 1);
-	}, slideTimer);
+	var timerEnable = this.parent.getAttribute('timer-enable');
+	var timerTime = this.parent.getAttribute('slide-time');
+	if(timerEnable === null || timerEnable === '' || timerEnable === '1'){
+		this.time = !(timerTime === null || timerTime === '') ? timerTime : slideTimer;
+		console.log(this.time);
+		this.timer = new PausableTimer(function(){
+			obj.changeSlide(false, obj.index + 1);
+		}, this.time);
+	}
 	
 	this.prevButt.addEventListener('click', function(){ // listens for a click on the button
 	
@@ -157,4 +163,40 @@ function buildSlideshowObjs(){
 	}
 }
 
+function checkOnScreen(element){
+	var rect = element.getBoundingClientRect(); // get the total size of the rectangle and its position
+	var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight); // get the height of the view port
+	return (rect.bottom < 0 || rect.top - viewHeight >= 0); // if the bottom position is less than 0 or the top - the viewport height is greater than 0 then return true.
+}
+
 document.onLoad = buildSlideshowObjs();
+
+window.onscroll = function(){ // detects when the window scrolls 
+	for(var i = 0; i < slideshowObjs.length; i++){ // goes through each Slideshow object
+		/*checks if the Slideshow object is on screen and if its timer has not been paused, if both are
+		true then the objects timer is paused*/
+		if(checkOnScreen(slideshowObjs[i].parent) && !slideshowObjs[i].timer.paused){
+			slideshowObjs[i].timer.pause();
+		}
+		// if the slideshow is on screen and its timer is paused then it unpauses its timer
+		else if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){
+			slideshowObjs[i].timer.unpause();
+		}
+	}
+};
+
+window.onblur = function(){ // fires when the tab or browser is no longer active
+	for(var i = 0; i < slideshowObjs.length; i++){ // goes through all slideshow objects
+		if(!slideshowObjs[i].timer.paused){ // if the timer is not already paused
+			slideshowObjs[i].timer.pause(); // pauses the timer of the slideshow
+		}
+	}
+};
+
+window.onfocus = function(){ // fires when the tab or browser becomes active
+	for(var i = 0; i < slideshowObjs.length; i++){ // goes through every slideshow object
+		if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){ // if the slideshow is on sceen and its timer is paused 
+			slideshowObjs[i].timer.unpause(); // unpauses the slideshows timer timer
+		}
+	}
+};
