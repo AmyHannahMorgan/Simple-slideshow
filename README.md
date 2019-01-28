@@ -73,8 +73,11 @@ In order to add images simply add `<img>` elements to the slideshow element, whe
 
 ## TODO
 The tasks below are listed in order of importance, however, this does not mean the tasks will be completed in order.
+1. Add applicable webkit variations of css stylings.
+1. change use of classes to use of custom elements
 1. Add ability to enable, disable and customise timers on individual slideshows
-1. Add pauseable timer
+1. ~~Add pauseable timer~~
 1. Add scroll detection to pause a timer when slideshow elements are off screen
+1. add functionality for slide captions
 1. Add different styles of slideshow
 1. Add different animation styles
