@@ -33,11 +33,11 @@ Once the files have been linked to you can start creating your slideshow element
 ```html
 <slideshow>
 	<div class="slideshowControls">
-		
+
 	</div>
 </slideshow>
 ```
-Once these container elements have been created you can begin adding functionalliy to the slideshow controls. Firstly add two `<button>` elements to the slideshowControls div. Then add a `<div>` element with the class `slideshowBar`. The buttons will become your previous and next slide buttons and the slideshowBar div will display the number of slides in the slideshow and allow for unorderd navigation of the slideshow by the user. Your slideshow element sould now look like this:
+Once these container elements have been created you can begin adding functionalliy to the slideshow controls. Firstly add two `<button>` elements to the slideshowControls div. Then add a `<div>` element with the class `slideshowBar`. The buttons will become your previous and next slide buttons and the slideshowBar div will display the number of slides in the slideshow and allow for unorderd navigation of the slideshow by the user. Your slideshow element should now look like this:
 
 ```html
 <slideshow>
@@ -45,7 +45,7 @@ Once these container elements have been created you can begin adding functionall
 		<button></button>
 		<button></button>
 		<div class="slideshowBar">
-			
+
 		</div>
 	</div>
 </slideshow>
@@ -54,7 +54,7 @@ Lastly add an inline style to the slideshow element to set its width and height,
 
 #### Adding images
 
-In order to add images simply add `<img>` elements to the slideshow element, when the webpage is loaded the extra `<img>` elements will be culled and their srcs added to the images attribute of the corresponding `Slideshow` object. Once you've added your images your slideshow element sould look something like this:
+In order to add images simply add `<img>` elements to the slideshow element, when the webpage is loaded the extra `<img>` elements will be culled and their srcs added to the images attribute of the corresponding `Slideshow` object. Once you've added your images your slideshow element should look something like this:
 ```html
 <slideshow style="height: 300px; width: 600px;">
 	<img src"images/tis but a scratch.jpg"/>
@@ -65,7 +65,7 @@ In order to add images simply add `<img>` elements to the slideshow element, whe
 		<button></button>
 		<button></button>
 		<div class="slideshowBar">
-			
+
 		</div>
 	</div>
 </slideshow>
