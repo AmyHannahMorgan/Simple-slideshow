@@ -11,7 +11,7 @@ function PausableTimer(func, time){ // creates a pausabletimer object
 	this.timer = setTimeout(this.func, this.time); // creates a timeout using the function and time provided
 	this.start = Date.now(); // stores the date
 	this.paused = false;
-	
+
 	this.pause = function(){
 		if(!this.paused){
 			clearTimeout(this.timer);
@@ -19,84 +19,88 @@ function PausableTimer(func, time){ // creates a pausabletimer object
 			this.paused = true;
 		}
 	};
-	
+
 	this.unpause = function(){
 		if(this.paused){
 			this.timer = setTimeout(this.func, this.continue);
 			this.paused = false;
 		}
 	};
-	
+
 	this.restart = function(){
 		this.timer = setTimeout(this.func, this.time);
 		this.start = Date.now();
 	};
-	
+
 	this.clear = function(){
 		clearTimeout(this.timer);
 	};
 }
-	
+
 function Slideshow(slideshowElem) { // function for creating slideshow objects
 
-	/* 'this' refers to the object that is containing it, in this case 'this' is refering to the Slideshow 
+	/* 'this' refers to the object that is containing it, in this case 'this' is refering to the Slideshow
 	object that is being created. We create and set attributes and methods of objects by first calling
 	'this.' followed by the name of the attribute or method and then the value */
-	
+
 	this.parent = slideshowElem; // saves the parent slideshow element as an attripute
-	
+
 	this.images = buildImages(this.parent.querySelectorAll('img')); // creates an array for storeing image objects
-	
+
 	this.index = 0; // sets the slide index to 0, the first image/slide
 	this.slide = this.parent.querySelector('img'); // sets the slide to the first img element for future use.
-	
+
 	this.inProg = false; // attribute to detect if the slideshow is changing slides
-	
+
 	// finds the first element with the class slideshow controls
 	this.controls = this.parent.querySelector('.slideshowControls');
 	var buttons = this.controls.querySelectorAll('button'); // finds all the buttons
 	this.prevButt = buttons[0]; // sets the previous button to the first button element
 	this.nextButt = buttons[buttons.length - 1]; // sets the next button to the last button element
-	this.controlBar = this.controls.querySelector('.slideshowBar');
-	this.dots = buildBarDots(this.controlBar, this.images.length, this);
-	
-	/* TODO add explenation of encapsulation and 'this' use*/
-	
+	this.controlBar = this.controls.querySelector('.slideshowBar'); // finds the control bar
+	this.dots = buildBarDots(this.controlBar, this.images.length, this); // generates navigation buttons for the control bar
+
+	// TODO: add explenation of encapsulation and 'this' use
+
 	var obj = this; // creates a variable referencing the object
-	var timerEnable = this.parent.getAttribute('timer-enable');
+	this.timerEnable = this.parent.getAttribute('timer-enable') != '0' ? true : false;
 	var timerTime = this.parent.getAttribute('slide-time');
-	if(timerEnable === null || timerEnable === '' || timerEnable === '1'){
+	if(this.timerEnable){
 		this.time = !(timerTime === null || timerTime === '') ? timerTime : slideTimer;
 		console.log(this.time);
 		this.timer = new PausableTimer(function(){
 			obj.changeSlide(false, obj.index + 1);
 		}, this.time);
 	}
-	
+	else {
+		this.timer = undefined;
+		this.time = undefined;
+	}
+
 	this.prevButt.addEventListener('click', function(){ // listens for a click on the button
-	
+
 	/* we cannot use 'this' inside of event functions as 'this' refers to the object calling the function,
 	in this case the prevButt element, so we use the above obj variable to refer to the Slideshow object*/
-	
+
 		if(!obj.inProg){ // checks if the slide is being changed already
 			obj.changeSlide(true, obj.index - 1); // calls a method from the Slideshow object
 		}
 	});
-	
+
 	this.nextButt.addEventListener('click', function(){
-		if(!obj.inProg){ 
+		if(!obj.inProg){
 			obj.changeSlide(true, obj.index + 1);
 		}
 	});
-	
+
 	this.changeSlide = function(click, slide){
 		this.inProg = true;
-		if(click === true){
+		if(click === true && this.timerEnable){
 			this.timer.clear(); // clear slide timer if button was clicked
 		}
-		
+
 		/* checks if selected slide is above greater than the length of the array and loops the slide if so*/
-		if(slide >= this.images.length){ 
+		if(slide >= this.images.length){
 			slide = 0;
 		}
 		/*loops the slide to the last index if it is less than 0*/
@@ -116,7 +120,9 @@ function Slideshow(slideshowElem) { // function for creating slideshow objects
 				this.removeEventListener('animationend', bar);
 				obj.index = slide; // sets the new index to the slide index;
 				obj.inProg = false; // sets in progress to false to allow the slides to be changed again
-				obj.timer.restart();
+				if(obj.timerEnable){
+					obj.timer.restart();
+				}
 			});
 			this.classList.add('ssFadeIn');
 			obj.dots[slide].classList.add('active');
@@ -171,32 +177,38 @@ function checkOnScreen(element){
 
 document.onLoad = buildSlideshowObjs();
 
-window.onscroll = function(){ // detects when the window scrolls 
+window.onscroll = function(){ // detects when the window scrolls
 	for(var i = 0; i < slideshowObjs.length; i++){ // goes through each Slideshow object
-		/*checks if the Slideshow object is on screen and if its timer has not been paused, if both are
-		true then the objects timer is paused*/
-		if(checkOnScreen(slideshowObjs[i].parent) && !slideshowObjs[i].timer.paused){
-			slideshowObjs[i].timer.pause();
-		}
-		// if the slideshow is on screen and its timer is paused then it unpauses its timer
-		else if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){
-			slideshowObjs[i].timer.unpause();
+		if(slideshowObjs[i].timerEnable){
+			/*checks if the Slideshow object is on screen and if its timer has not been paused, if both are
+			true then the objects timer is paused*/
+			if(checkOnScreen(slideshowObjs[i].parent) && !slideshowObjs[i].timer.paused){
+				slideshowObjs[i].timer.pause();
+			}
+			// if the slideshow is on screen and its timer is paused then it unpauses its timer
+			else if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){
+				slideshowObjs[i].timer.unpause();
+			}
 		}
 	}
 };
 
 window.onblur = function(){ // fires when the tab or browser is no longer active
 	for(var i = 0; i < slideshowObjs.length; i++){ // goes through all slideshow objects
-		if(!slideshowObjs[i].timer.paused){ // if the timer is not already paused
-			slideshowObjs[i].timer.pause(); // pauses the timer of the slideshow
+		if(slideshowObjs[i].timerEnable){
+			if(!slideshowObjs[i].timer.paused){ // if the timer is not already paused
+				slideshowObjs[i].timer.pause(); // pauses the timer of the slideshow
+			}
 		}
 	}
 };
 
 window.onfocus = function(){ // fires when the tab or browser becomes active
 	for(var i = 0; i < slideshowObjs.length; i++){ // goes through every slideshow object
-		if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){ // if the slideshow is on sceen and its timer is paused 
-			slideshowObjs[i].timer.unpause(); // unpauses the slideshows timer timer
+		if(slideshowObjs[i].timerEnable){
+			if(!checkOnScreen(slideshowObjs[i].parent) && slideshowObjs[i].timer.paused){ // if the slideshow is on sceen and its timer is paused
+				slideshowObjs[i].timer.unpause(); // unpauses the slideshows timer timer
+			}
 		}
 	}
 };
